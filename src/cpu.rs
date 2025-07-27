@@ -1,4 +1,5 @@
 use crate::opcodes;
+use crate::bus::Bus;
 use std::{collections::HashMap, num::NonZero};
 use crate::opcodes::OpCode;
 
@@ -10,7 +11,7 @@ pub struct CPU {
     pub register_x: u8,
     pub register_y: u8,
     pub stack_pointer: u8,
-    pub memory: [u8; 0x10000]
+    pub bus: Bus,
 }
 
 #[derive(Debug, PartialEq)]
@@ -43,7 +44,6 @@ const FLAG_NEGATIVE: u8 = 1 << 7;
 
 const SIGN_BIT: u8 = 1 << 7;
 
-//CPU
 impl CPU {
     pub fn new() -> Self{
         CPU {
@@ -53,9 +53,28 @@ impl CPU {
             register_x: 0,
             register_y: 0,
             stack_pointer: 0xFF,
-            memory: [0x00; 0x10000],
+            bus: Bus::new(),
             }
     }
+
+    impl Mem for CPU {
+        fn mem_read(&self, addr: u16) -> u8{
+            self.bus.mem_read(addr)
+        }
+
+        fn mem_write(&mut self, addr: u16, data: u8){
+            self.bus.mem_write(addr, data)
+        }
+
+        fn mem_read_u16(&self, pos: u16) -> u16{
+            self.bus.mem_read_u16(pos)
+        }
+
+        fn mem_write_u16(&self, pos: u16, data: u16){
+            self.bus.mem_write_u16(pos, data)
+        }
+    }
+
 
     pub fn mem_read(&self, addr: u16) -> u8 {
         self.memory[addr as usize]
