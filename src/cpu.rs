@@ -1,5 +1,5 @@
-use crate::opcodes;
-use crate::bus::Bus;
+use crate::{opcodes, rom};
+use crate::bus::{Bus, Mem};
 use std::{collections::HashMap, num::NonZero};
 use crate::opcodes::OpCode;
 
@@ -44,8 +44,18 @@ const FLAG_NEGATIVE: u8 = 1 << 7;
 
 const SIGN_BIT: u8 = 1 << 7;
 
+impl Mem for CPU {
+    fn mem_read(&self, addr: u16) -> u8{
+        self.bus.mem_read(addr)
+    }
+
+    fn mem_write(&mut self, addr: u16, data: u8){
+        self.bus.mem_write(addr, data)
+    }
+}
+
 impl CPU {
-    pub fn new() -> Self{
+    pub fn new(bus: Bus) -> Self{
         CPU {
             register_a: 0,
             status: FLAG_INTERRUPT | FLAG_BREAK2,
@@ -53,26 +63,8 @@ impl CPU {
             register_x: 0,
             register_y: 0,
             stack_pointer: 0xFF,
-            bus: Bus::new(),
+            bus: bus,
             }
-    }
-
-    impl Mem for CPU {
-        fn mem_read(&self, addr: u16) -> u8{
-            self.bus.mem_read(addr)
-        }
-
-        fn mem_write(&mut self, addr: u16, data: u8){
-            self.bus.mem_write(addr, data)
-        }
-
-        fn mem_read_u16(&self, pos: u16) -> u16{
-            self.bus.mem_read_u16(pos)
-        }
-
-        fn mem_write_u16(&self, pos: u16, data: u16){
-            self.bus.mem_write_u16(pos, data)
-        }
     }
 
 
@@ -115,8 +107,8 @@ impl CPU {
     }
 
     pub fn load(&mut self, game_code: Vec<u8>){
-        self.memory[0x0600 .. (0x0600 + game_code.len())].copy_from_slice(&game_code[..]);
-        self.mem_write_u16(0xFFFC, 0x0600);
+        //self.memory[0x8000 .. (0x8000 + game_code.len())].copy_from_slice(&game_code[..]);
+        //self.mem_write_u16(0xFFFC, 0x8000);
     }
 
 
@@ -1062,9 +1054,7 @@ impl CPU {
         };
     }
 
-
-}
-    //pub fn interpret(&mut self, program: Vec<u8>){
+    }    //pub fn interpret(&mut self, program: Vec<u8>){
     
 
 #[cfg(test)]

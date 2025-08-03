@@ -1,6 +1,7 @@
 pub mod cpu;
 pub mod opcodes;
 pub mod bus;
+pub mod rom;
 
 use lazy_static::lazy_static;
 use rand::Rng;
